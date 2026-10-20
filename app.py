@@ -1,8 +1,11 @@
 import pandas as pd
 import numpy as np
+from datetime import date
 from pathlib import Path
 
 from dash import Dash, dcc, html, Input, Output
+
+import dash_bootstrap_components as dbc
 
 import plotly.express as px
 import plotly.graph_objects as go
@@ -71,13 +74,27 @@ df_close["Recruiting_Year_Month"] = (
 
 time_to_offer_by_month = (df_close.groupby("Recruiting_Year_Month")["Time to Offer"].mean().round(1).reset_index())
 
+# Define colour
+Navy = "#0B1F5E"
+
 
 # Dash
-app = Dash(__name__)
+app = Dash(__name__ ,external_stylesheets=[dbc.themes.FLATLY,
+        "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"])
 
 app.layout = html.Div([
     
-    html.H1("Workforce Planning Dashboard"),
+    html.H1("Workforce Planning Dashboard",
+            style = {"fontSize": "30px",
+                     "fontWeight": "700",
+                     "color": Navy,
+                     "marginBottom": "2px"}),
+
+    html.P( f"As at {date.today().strftime('%d %B %Y')}",
+           style = {"fontSuze": "14px",
+                    "color": "#6c757D",
+                    "marginBottom": "20x"}
+            ),
 
 # Dashboard - Element A (Filteres)
     html.Div([
@@ -119,44 +136,282 @@ app.layout = html.Div([
 
 
 # Dashbboard - Element B (KPIs)
-    html.Div([
+    dbc.Row([
+
+    # Number of planned roles
+    dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+
+            html.Div(
+                html.I(
+                    className="bi bi-people-fill",
+                    style={
+                        "fontSize": "20px"
+                    }
+                ),
+                style={
+                    "backgroundColor": Navy,
+                    "color": "white",
+                    "borderRadius": "50%",
+                    "width": "42px",
+                    "height": "42px",
+                    "minWidth": "42px",
+                    "display": "flex",
+                    "alignItems": "center",
+                    "justifyContent": "center",
+                    "fontSize": "21px",
+                    "marginRight": "12px"
+                }
+            ),
+
+        html.Div([
+            html.P("TOTAL PLANNED ROLES", 
+                   style={
+                        "fontSize": "12px",
+                        "color": "#6C757D",
+                        "marginBottom": "2px"
+                    }),
+            html.H3(id = "total-roles", 
+                    style={
+                        "fontSize": "26px",
+                        "fontWeight": "700",
+                        "color": Navy,
+                        "marginBottom": "0"
+                    })
+        ])
+        ],  style={
+            "display": "flex",
+            "alignItems": "center",
+            "padding": "18px"}
+        )], 
+        className="shadow-sm h-100",
+        style={
+            "border": "1px solid #E6E9EF",
+            "borderRadius": "10px"}
+        
+        )], width  = True),
+
+    # Number of filled roles
+    dbc.Col([
+        dbc.Card([
+                dbc.CardBody([
+
+            html.Div(
+                html.I(
+                    className="bi bi-person-check-fill",
+                    style={"fontSize": "20px"}
+                        ),
+                style={
+                    "backgroundColor": Navy,
+                    "color": "white",
+                    "borderRadius": "50%",
+                    "width": "42px",
+                    "height": "42px",
+                    "minWidth": "42px",
+                    "display": "flex",
+                    "alignItems": "center",
+                    "justifyContent": "center",
+                    "fontSize": "21px",
+                    "marginRight": "12px"
+                }
+            ),
+
+        html.Div([
+            html.P("FILLED ROLES", 
+                   style={
+                        "fontSize": "12px",
+                        "color": "#6C757D",
+                        "marginBottom": "2px"
+                    }),
+            html.H3(id = "filled-roles", 
+                    style={
+                        "fontSize": "26px",
+                        "fontWeight": "700",
+                        "color": Navy,
+                        "marginBottom": "0"
+                    })
+        ])
+        ],  style={
+            "display": "flex",
+            "alignItems": "center",
+            "padding": "18px"}
+        )], 
+        className="shadow-sm h-100",
+        style={
+            "border": "1px solid #E6E9EF",
+            "borderRadius": "10px"}
+        
+        )], width = True),
+
+    # Number of vacant roles
+    dbc.Col([
+                     dbc.Card([
+                         dbc.CardBody([
+         
+                     html.Div(
+                         html.I(
+                            className="bi bi-person-dash",
+                            style={"fontSize": "20px"}),
+
+                         style={
+                             "backgroundColor": Navy,
+                             "color": "white",
+                             "borderRadius": "50%",
+                             "width": "42px",
+                             "height": "42px",
+                             "minWidth": "42px",
+                             "display": "flex",
+                             "alignItems": "center",
+                             "justifyContent": "center",
+                             "fontSize": "21px",
+                             "marginRight": "12px"
+                         }
+                     ),
+         
+                 # Number of Planned Roles
+                 html.Div([
+                     html.P("VACANT ROLES", 
+                            style={
+                                 "fontSize": "12px",
+                                 "color": "#6C757D",
+                                 "marginBottom": "2px"
+                             }),
+                     html.H3(id = "vacant-roles", 
+                             style={
+                                 "fontSize": "26px",
+                                 "fontWeight": "700",
+                                 "color": Navy,
+                                 "marginBottom": "0"
+                             })
+                 ])
+                 ],  style={
+                     "display": "flex",
+                     "alignItems": "center",
+                     "padding": "18px"}
+                 )], 
+                 className="shadow-sm h-100",
+                 style={
+                     "border": "1px solid #E6E9EF",
+                     "borderRadius": "10px"}
+                 
+                 )], width = True),
+
+    # Number of vacancy rate
+    dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+
+            html.Div(
+                html.I(
+                    className="bi bi-percent",
+                    style={"fontSize": "20px"}),
+
+                style={
+                    "backgroundColor": Navy,
+                    "color": "white",
+                    "borderRadius": "50%",
+                    "width": "42px",
+                    "height": "42px",
+                    "minWidth": "42px",
+                    "display": "flex",
+                    "alignItems": "center",
+                    "justifyContent": "center",
+                    "fontSize": "21px",
+                    "marginRight": "12px"
+                }
+            ),
 
         # Number of Planned Roles
         html.Div([
-            html.P("TOTAL PLANNED ROLES"),
-            html.H2(id = "total-roles")
-        ]),
-
-        # Number of Filled Roles
-        html.Div([
-            html.P("FILLED ROLES"),
-            html.H2(id = "filled-roles")
-        ]),
-
-        # Number of Vacant Roles
-        html.Div([
-            html.P("VACANT ROLES"),
-            html.H2(id = "vacant-roles")
-        ]),
-
-        # Vacancy Rate
-        html.Div([
-            html.P("VACANCY RATE"),
-            html.H2(id = "vacant-rate")
-        ]),
-
-        # Approved to Hire
-        html.Div([
-            html.P("APPROVED TO HIRE"),
-            html.H2(id = "approved-to-hire")
+            html.P("VACANCY RATE", 
+                   style={
+                        "fontSize": "12px",
+                        "color": "#6C757D",
+                        "marginBottom": "2px"
+                    }),
+            html.H3(id = "vacant-rate", 
+                    style={
+                        "fontSize": "26px",
+                        "fontWeight": "700",
+                        "color": Navy,
+                        "marginBottom": "0"
+                    })
         ])
+        ],  style={
+            "display": "flex",
+            "alignItems": "center",
+            "padding": "18px"}
+        )], 
+        className="shadow-sm h-100",
+        style={
+            "border": "1px solid #E6E9EF",
+            "borderRadius": "10px"}
+        
+        )], width = True),
 
-    ], style={
-        "display": "flex",
-        "justifyContent": "space-between"
-    })
+    # Number of approved to hire
+    dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
 
-])
+            html.Div(
+                html.I(
+                    className="bi bi-person-plus-fill",
+                    style={"fontSize": "20px"}),
+
+                style={
+                    "backgroundColor": Navy,
+                    "color": "white",
+                    "borderRadius": "50%",
+                    "width": "42px",
+                    "height": "42px",
+                    "minWidth": "42px",
+                    "display": "flex",
+                    "alignItems": "center",
+                    "justifyContent": "center",
+                    "fontSize": "21px",
+                    "marginRight": "12px"
+                }
+            ),
+
+        # Number of Planned Roles
+        html.Div([
+            html.P("APPROVED TO HIRE", 
+                   style={
+                        "fontSize": "12px",
+                        "color": "#6C757D",
+                        "marginBottom": "2px"
+                    }),
+            html.H3(id = "approved-to-hire", 
+                    style={
+                        "fontSize": "26px",
+                        "fontWeight": "700",
+                        "color": Navy,
+                        "marginBottom": "0"
+                    })
+        ])
+        ],  style={
+            "display": "flex",
+            "alignItems": "center",
+            "padding": "18px"})
+            
+        ], 
+        className="shadow-sm h-100",
+        style={
+            "border": "1px solid #E6E9EF",
+            "borderRadius": "10px"}
+        )
+        ], width = True)
+
+    ], className = "gx-3", 
+        style ={"border": "3px dashed #B8C0CC", "borderRadius": "10px","paddingTop":"6px", "paddingBottom":"6px", "paddingLeft": "6px", "paddingRight": "6px", "margin": "5px 10px 20px 10px"})
+
+
+    ])
+
+
+        
 
 
 # Callback
