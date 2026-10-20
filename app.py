@@ -77,14 +77,126 @@ app = Dash(__name__)
 
 app.layout = html.Div([
     
-    html.H1("Workforce Planning Dashboard")
-    
+    html.H1("Workforce Planning Dashboard"),
+
+# Dashboard - Element A (Filteres)
+    html.Div([
+
+        # Function filter
+        html.Div([
+            html.Label("Functional Area"),
+            dcc.Dropdown(id = "function-filter",
+            options = [{"label": x, "value": x} for x in sorted (df_wfp["Function"].dropna().unique())], 
+            value = sorted(df_wfp["Function"].dropna().unique()), clearable = False, multi = True)
+        ]),
+
+
+        # Location filter
+        html.Div([
+            html.Label("Location"),
+            dcc.Dropdown(id = "location-filter",
+                         options = [{"label": x, "value": x} for x in sorted(df_wfp["LOCATION"].dropna().unique())], 
+                         value = sorted(df_wfp["LOCATION"].dropna().unique()), clearable = False, multi = True)
+        ]),
+
+        # Cost Centre filter
+        html.Div([
+                    html.Label("Cost Centre"),
+                    dcc.Dropdown(id = "cost-centre-filter",
+                                 options =  [{"label": x, "value": x} for x in sorted(df_wfp["Cost Centre ID"].dropna().unique())], 
+                                 value = sorted(df_wfp["Cost Centre ID"].dropna().unique()), clearable = False, multi = True)
+                ]),
+
+        # Talent Acquisition Partner filter
+         html.Div([
+                    html.Label("Talent Acquisiiton Partner"),
+                    dcc.Dropdown(id = "ta-partner-filter",
+                                 options = [{"label": x, "value": x} for x in sorted(df_open["Talent Acquisition Partner"].dropna().unique())], 
+                                 value = sorted(df_open["Talent Acquisition Partner"].dropna().unique()), clearable = False, multi = True)
+                ])
+        ], style = {"display": "flex", "gap": "20x"}
+        ),
+
+
+# Dashbboard - Element B (KPIs)
+    html.Div([
+
+        # Number of Planned Roles
+        html.Div([
+            html.P("TOTAL PLANNED ROLES"),
+            html.H2(id = "total-roles")
+        ]),
+
+        # Number of Filled Roles
+        html.Div([
+            html.P("FILLED ROLES"),
+            html.H2(id = "filled-roles")
+        ]),
+
+        # Number of Vacant Roles
+        html.Div([
+            html.P("VACANT ROLES"),
+            html.H2(id = "vacant-roles")
+        ]),
+
+        # Vacancy Rate
+        html.Div([
+            html.P("VACANCY RATE"),
+            html.H2(id = "vacant-rate")
+        ]),
+
+        # Approved to Hire
+        html.Div([
+            html.P("APPROVED TO HIRE"),
+            html.H2(id = "approved-to-hire")
+        ])
+
+    ], style={
+        "display": "flex",
+        "justifyContent": "space-between"
+    })
+
 ])
 
-# Dashboard
+
+# Callback
+@app.callback(
+    Output("total-roles", "children"),
+    Output("filled-roles", "children"),
+    Output("vacant-roles", "children"),
+    Output("vacant-rate", "children"),
+    Output("approved-to-hire", "children"),
+
+    Input("function-filter", "value"),
+    Input("location-filter", "value"),
+    Input("cost-centre-filter", "value"),   
+    )
 
 
+# Calculate KPIs
+def update_kpis(function, location, cost_centre):
+    filtered_df = df_wfp.copy()
 
+    filtered_df = filtered_df[filtered_df["Function"].isin(function)]
+
+    filtered_df = filtered_df[filtered_df["LOCATION"].isin(location)]
+
+    filtered_df = filtered_df[filtered_df["Cost Centre ID"].isin(cost_centre)]
+
+    total = len(filtered_df)
+    filled = (filtered_df["ROLE STATUS"] == "Filled").sum()
+    vacant = (filtered_df["ROLE STATUS"] == "Vacant").sum()
+    vacant_rate = vacant / total if total > 0 else 0
+
+    approved_to_hire = filtered_df["SUB STATUS"].isin(["Actively hiring", "Approved"]).sum()
+
+    return (
+        f"{total:,}",
+        f"{filled:,}",
+        f"{vacant:,}",
+        f"{vacant_rate:.1%}",
+        f"{approved_to_hire:,}"
+    )
 
 # End
 app.run(debug=True)
