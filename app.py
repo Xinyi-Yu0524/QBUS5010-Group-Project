@@ -146,7 +146,7 @@ html.P(
 
         # Talent Acquisition Partner filter
          html.Div([
-                    html.Label("Talent Acquisiiton Partner"),
+                    html.Label("Talent Acquisiton Partner"),
                     dcc.Dropdown(id = "ta-partner-filter",
                                  options = [
                                     {"label": x, "value": x}
