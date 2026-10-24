@@ -148,8 +148,14 @@ html.P(
          html.Div([
                     html.Label("Talent Acquisiiton Partner"),
                     dcc.Dropdown(id = "ta-partner-filter",
-                                 options = [{"label": x, "value": x} for x in sorted(df_open["Talent Acquisition Partner"].dropna().unique())], 
-                                 value = sorted(df_open["Talent Acquisition Partner"].dropna().unique()), clearable=True, multi=True, searchable=True)
+                                 options = [
+                                    {"label": x, "value": x}
+                                    for x in sorted(df_open["Talent Acquisition Partner"].dropna().unique())
+                                 ] + [{"label": "No TA recorded", "value": "__NO_TA_RECORDED__"}],
+
+                                 value = sorted(df_open["Talent Acquisition Partner"].dropna().unique()) + ["__NO_TA_RECORDED__"], clearable=True, multi=True, searchable=True)
+
+
                 ])
         ], style={"display": "grid", "gridTemplateColumns": "repeat(4, minmax(0, 1fr))", "gap": "20px"}
         ),
@@ -631,7 +637,7 @@ def reset_all_filters(n_clicks):
         sorted(df_wfp["Function"].dropna().unique()),
         sorted(df_wfp["LOCATION"].dropna().unique()),
         sorted(df_wfp["Cost Centre ID"].dropna().unique()),
-        sorted(df_open["Talent Acquisition Partner"].dropna().unique())
+        sorted(df_open["Talent Acquisition Partner"].dropna().unique()) + ["__NO_TA_RECORDED__"]
     )
 
 
