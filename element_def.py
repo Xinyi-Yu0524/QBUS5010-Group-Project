@@ -526,8 +526,8 @@ def get_f_report_date(df_closed):
 
 # Prepare the data for F
 def prepare_f_data(df_closed):
-    columns = [
-        'Req ID', 'Function', 'Location', 'Recruiting Start Date', 'Offer Date'
+    columns = ['Req ID', 'Function', 'Location', 'Recruiting Start Date', 'Offer Date',
+        'Cost Centre ID', 'Talent Acquisition Partner'
     ]
     missing = sorted(set(columns)-set(df_closed.columns))
 
@@ -536,6 +536,9 @@ def prepare_f_data(df_closed):
 
     df_f = df_closed[columns].copy()
 
+    # Add the TA values for the filter
+    df_f['TA Filter Value'] = df_f['Talent Acquisition Partner']
+    
     # Remove extra spaces from IDs and text
     for column in ['Req ID', 'Function', 'Location']:
         text = df_f[column].astype('string').str.strip()
@@ -565,23 +568,18 @@ def prepare_f_data(df_closed):
     return df_f
 
 
-# Filter F using function and location only
-def filter_f_data(df_f, functions, locations):
-    filtered_df = df_f.copy()
+# Filter F using all four filters
+def filter_f_data(df_f, functions, locations, cost_centres, ta_partners):
+    # Show No Data if a filter has no selection
+    if not functions or not locations or not cost_centres or not ta_partners:
+        return df_f.iloc[:0].copy()
 
-    for column, selected in [
-        ('Function', functions),
-        ('Location', locations)
-    ]:
-        if isinstance(selected, str):
-            raise ValueError(f'{column} selection must be a list')
+    query1 = df_f['Function'].isin(functions)
+    query2 = df_f['Location'].isin(locations)
+    query3 = df_f['Cost Centre ID'].isin(cost_centres)
+    query4 = df_f['TA Filter Value'].isin(ta_partners)
 
-        # Show No Data if either filter has no selection
-        if selected is None or len(selected)==0:
-            return filtered_df.iloc[0:0].copy()
-
-        filtered_df = filtered_df[filtered_df[column].isin(selected)].copy()
-
+    filtered_df = df_f[query1 & query2 & query3 & query4].copy()
     return filtered_df
 
 
@@ -751,17 +749,21 @@ def make_f_layout():
     return layout
 
 
-# Connect only function and location to F
+# Connect the four filters to F
 def register_f_callback(app, df_f, report_date):
     @app.callback(
         Output('time-to-offer-chart', 'figure'),
         Output('time-to-offer-average', 'children'),
         Output('time-to-offer-summary', 'children'),
         Input('function-filter', 'value'),
-        Input('location-filter', 'value')
+        Input('location-filter', 'value'),
+        Input('cost-centre-filter', 'value'),
+        Input('ta-partner-filter', 'value')
     )
-    def update_f(functions, locations):
-        filtered_df = filter_f_data(df_f, functions, locations)
+    def update_f(functions, locations, cost_centres, ta_partners):
+        filtered_df = filter_f_data(
+            df_f, functions, locations, cost_centres, ta_partners
+        )
         summary = summarise_f(filtered_df, report_date)
         fig = build_f_figure(summary)
         average = format_f_average(summary)
